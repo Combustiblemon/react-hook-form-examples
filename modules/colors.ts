@@ -1,0 +1,17 @@
+export const gray1 = 'rgb(52,61,70)';
+export const gray2 = 'rgb(79,91,102)';
+export const gray3 = 'rgb(101,115,126)';
+export const gray4 = 'rgba(101,115,126, 0.5)';
+export const gray5 = 'rgba(101,115,126, 0.3)';
+export const gray6 = 'rgb(243, 243, 243)';
+export const gray7 = 'rgb(84, 84, 84)';
+export const gray8 = 'rgb(226, 232, 240)';
+export const lightGray = 'rgb(150, 155, 164)';
+export const white = 'rgb(255, 255, 255)';
+export const black = 'rgb(0, 0, 0)';
+export const red = 'rgb(255, 0, 0)';
+export const blue = 'rgb(0, 111, 230)';
+export const green = 'rgb(84, 230, 0)';
+export const lightGreen = 'rgb(79, 186, 122)';
+export const orange = 'rgb(246, 147, 44)';
+export const lightBlue = 'rgb(16, 164, 220)';
