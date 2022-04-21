@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { Wrapper, Error } from './FormElement.styles';
 
 const FormElement = ({
   children,
@@ -7,10 +8,10 @@ const FormElement = ({
   children: ReactNode;
   error?: string;
 }) => (
-  <div>
+  <Wrapper>
     {children}
-    {error && <span style={{ color: 'red' }}>{error}</span>}
-  </div>
+    {error && <Error>{error}</Error>}
+  </Wrapper>
 );
 
 export default FormElement;
