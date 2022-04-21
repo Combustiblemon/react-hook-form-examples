@@ -37,7 +37,6 @@ const hasUnder20Chars = (value: string): ValidateResult => {
   if (value?.length > 20) {
     result = 'The maximum number of characters is 20.';
   }
-  // eslint-disable-next-line no-promise-executor-return
   return result;
 };
 
@@ -70,7 +69,6 @@ const HookForm: NextPage = () => {
     register,
     formState: { errors, isSubmitting },
     setValue,
-    getValues,
     watch,
   } = useForm({
     // Validation will trigger on the submit event and invalid inputs will
@@ -83,6 +81,7 @@ const HookForm: NextPage = () => {
     defaultValues: initialValues,
   });
 
+  // this function is called on the form's 'onSubmit'
   function onSubmit(values: any) {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
@@ -100,13 +99,12 @@ const HookForm: NextPage = () => {
         <FormControl isInvalid={Boolean(errors.username)}>
           {/* Pass the error to 'FormElement' so it can display the error if it exists */}
           <FormElement error={errors.username?.message}>
-            <FormLabel htmlFor="username">First name</FormLabel>
+            <FormLabel htmlFor="username">Username</FormLabel>
             {/* This is a text input */}
             <Input
               colorScheme="blackAlpha"
               variant="filled"
               id="username"
-              placeholder="Username"
               // 'register' takes the name of the field (same as the one in 'initialValues')
               // and an object with the validations and various utilities
               // more info: https://react-hook-form.com/api/useform/register
@@ -173,6 +171,7 @@ const HookForm: NextPage = () => {
         <FormControl isInvalid={Boolean(errors.gender)}>
           <FormElement error={errors.gender?.message}>
             <FormLabel htmlFor="gender">Select your gender</FormLabel>
+            {/* This is a select input */}
             <Select
               variant="filled"
               colorScheme="blackAlpha"
