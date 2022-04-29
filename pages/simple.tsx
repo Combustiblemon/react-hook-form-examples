@@ -65,14 +65,14 @@ const twoSelected = (value: string[]): ValidateResult => {
 interface initialValuesTypes {
   username: string;
   age: string;
-  selectedCardsId: string[];
+  selectedCardsId: string;
   gender: string;
 }
 
 const initialValues: initialValuesTypes = {
   username: '',
   age: '',
-  selectedCardsId: [],
+  selectedCardsId: '',
   gender: 'male',
 };
 
@@ -153,14 +153,13 @@ const HookForm: NextPage = () => {
             />
           </FormElement>
         </FormControl>
-        <FormElement error={errors.selectedCardsId?.[0].message}>
+        <FormElement error={errors.selectedCardsId?.message}>
           <FormLabel htmlFor="direction">Where are you from?</FormLabel>
           {/* This is a collection of cards you can select */}
           <CardWrapper
             id="direction"
             {...register('selectedCardsId', {
               required: { value: true, message: 'This is required.' },
-              validate: twoSelected,
             })}
           >
             {mockAPIData.map((card) => {
@@ -168,25 +167,22 @@ const HookForm: NextPage = () => {
                 <Card
                   key={card.id}
                   onClick={() => {
-                    const selectedCards = getValues('selectedCardsId');
+                    let value = card.id;
 
-                    // if card is selected remove it from the 'selectedCards' array
-                    // else add it to the selected cards
-                    if (selectedCards.includes(card.id)) {
-                      selectedCards.splice(selectedCards.indexOf(card.id), 1);
-                    } else {
-                      selectedCards.push(card.id);
+                    // If card is selected, deselect it
+                    if (card.id === getValues('selectedCardsId')) {
+                      value = '';
                     }
 
                     // We have to use 'setValue' in 'onClick' since this is not an input
-                    setValue('selectedCardsId', selectedCards, {
+                    setValue('selectedCardsId', value, {
                       shouldTouch: true,
                       // Validation on this runs on first submit and onwards
                       shouldValidate: submitCount > 0,
                     });
                   }}
                   // 'watch' is used to trigger a re-render on the component
-                  selected={watch('selectedCardsId').includes(card.id)}
+                  selected={watch('selectedCardsId') === card.id}
                 >
                   {card.name}
                 </Card>

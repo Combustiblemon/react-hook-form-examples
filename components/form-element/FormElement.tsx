@@ -6,7 +6,7 @@ const FormElement = ({
   error,
 }: {
   children: ReactNode;
-  error?: string;
+  error?: string | any;
 }) => (
   <Wrapper>
     {children}

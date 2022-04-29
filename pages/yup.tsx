@@ -1,6 +1,7 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import Card from '@/components/card/Card';
-import { CardWrapper, Form, Header, Wrapper } from '@/styles/Index.styles';
+import FormElement from '@/components/form-element/FormElement';
+import { Wrapper } from '@/components/form-element/FormElement.styles';
+import { CardWrapper, Form, Header } from '@/styles/Index.styles';
 import {
   Button,
   FormControl,
@@ -8,10 +9,11 @@ import {
   Input,
   Select,
 } from '@chakra-ui/react';
-import { NextPage } from 'next/types';
-import { useForm, ValidateResult } from 'react-hook-form';
-
-import FormElement from '../components/form-element/FormElement';
+import { NextPage } from 'next';
+import React, { useCallback, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { OptionalObjectSchema } from 'yup/lib/object';
 
 const mockAPIData = [
   {
@@ -32,51 +34,68 @@ const mockAPIData = [
   },
 ];
 
-const hasUnder20Chars = (value: string): ValidateResult => {
-  let result: ValidateResult = true;
-  if (value?.length > 20) {
-    result = 'The maximum number of characters is 20.';
-  }
-  return result;
-};
+const useYupValidationResolver = (
+  validationSchema: OptionalObjectSchema<any>
+) =>
+  useCallback(
+    async (data: FormValuesTypes) => {
+      try {
+        const values = await validationSchema.validate(data, {
+          abortEarly: false,
+        });
 
-const isUsernameAvailable = (value: string): Promise<ValidateResult> => {
-  let result: ValidateResult = true;
-  if (value.toLowerCase() === 'username') {
-    result = 'Username is not available.';
-  }
-  return new Promise((resolve) => setTimeout(() => resolve(result), 0));
-};
+        return {
+          values,
+          errors: {},
+        };
+      } catch (errors: any) {
+        return {
+          values: {},
+          errors: errors.inner.reduce(
+            (allErrors: any, currentError: any) => ({
+              ...allErrors,
+              [currentError.path]: {
+                type: currentError.type ?? 'validation',
+                message: currentError.message,
+              },
+            }),
+            {}
+          ),
+        };
+      }
+    },
+    [validationSchema]
+  );
 
-const isValidGender = (value: string): ValidateResult => {
-  let result: ValidateResult = true;
-  if (value === 'dog') {
-    result = 'You are not a dog...';
-  }
-  return result;
-};
+const validationSchema = yup.object({
+  username: yup
+    .string()
+    .required('Required')
+    .min(4, 'Must be more than 3 characters'),
+  age: yup.number().required('Required').min(18, 'Must be over 18.'),
+  selectedCardsId: yup.string().required('Required'),
+  gender: yup
+    .string()
+    .required('Required')
+    .notOneOf(['dog'], 'You are not a dog...'),
+});
 
-const twoSelected = (value: string[]): ValidateResult => {
-  let result: ValidateResult = true;
-  if (value.length < 2) result = 'Please select at least two cards.';
-  return result;
-};
-
-interface initialValuesTypes {
+interface FormValuesTypes {
   username: string;
-  age: string;
-  selectedCardsId: string[];
+  age: number;
+  selectedCardsId: string;
   gender: string;
 }
 
-const initialValues: initialValuesTypes = {
+const initialValues: FormValuesTypes = {
   username: '',
-  age: '',
-  selectedCardsId: [],
+  age: 0,
+  selectedCardsId: '',
   gender: 'male',
 };
 
-const HookForm: NextPage = () => {
+const HookFormYup: NextPage = () => {
+  const resolver = useYupValidationResolver(validationSchema);
   const {
     handleSubmit,
     register,
@@ -84,7 +103,7 @@ const HookForm: NextPage = () => {
     setValue,
     getValues,
     watch,
-  } = useForm({
+  } = useForm<FormValuesTypes>({
     // Validation will trigger on the submit event and invalid inputs will
     // attach 'onChange' event listeners to re-validate them.
     mode: 'onSubmit',
@@ -93,6 +112,7 @@ const HookForm: NextPage = () => {
     delayError: 0,
     // The default values used for initialization
     defaultValues: initialValues,
+    resolver,
   });
 
   // this function is called on the form's 'onSubmit'
@@ -122,14 +142,7 @@ const HookForm: NextPage = () => {
               // 'register' takes the name of the field (same as the one in 'initialValues')
               // and an object with the validations and various utilities
               // more info: https://react-hook-form.com/api/useform/register
-              {...register('username', {
-                required: 'This is required.',
-                minLength: { value: 4, message: 'Minimum length is 4.' },
-                validate: {
-                  under20Chars: hasUnder20Chars,
-                  available: isUsernameAvailable,
-                },
-              })}
+              {...register('username')}
             />
           </FormElement>
         </FormControl>
@@ -143,50 +156,35 @@ const HookForm: NextPage = () => {
               id="age"
               type="number"
               placeholder="Age"
-              {...register('age', {
-                required: { value: true, message: 'This is required.' },
-                min: {
-                  value: 18,
-                  message: 'You must be over 18 years old to sign up.',
-                },
-              })}
+              {...register('age')}
             />
           </FormElement>
         </FormControl>
-        <FormElement error={errors.selectedCardsId?.[0].message}>
+        <FormElement error={errors.selectedCardsId?.message}>
           <FormLabel htmlFor="direction">Where are you from?</FormLabel>
           {/* This is a collection of cards you can select */}
-          <CardWrapper
-            id="direction"
-            {...register('selectedCardsId', {
-              required: { value: true, message: 'This is required.' },
-              validate: twoSelected,
-            })}
-          >
+          <CardWrapper id="direction" {...register('selectedCardsId')}>
             {mockAPIData.map((card) => {
               return (
                 <Card
                   key={card.id}
                   onClick={() => {
-                    const selectedCards = getValues('selectedCardsId');
+                    let value = card.id;
 
-                    // if card is selected remove it from the 'selectedCards' array
-                    // else add it to the selected cards
-                    if (selectedCards.includes(card.id)) {
-                      selectedCards.splice(selectedCards.indexOf(card.id), 1);
-                    } else {
-                      selectedCards.push(card.id);
+                    // If card is selected, deselect it
+                    if (card.id === getValues('selectedCardsId')) {
+                      value = '';
                     }
 
                     // We have to use 'setValue' in 'onClick' since this is not an input
-                    setValue('selectedCardsId', selectedCards, {
+                    setValue('selectedCardsId', value, {
                       shouldTouch: true,
                       // Validation on this runs on first submit and onwards
                       shouldValidate: submitCount > 0,
                     });
                   }}
                   // 'watch' is used to trigger a re-render on the component
-                  selected={watch('selectedCardsId').includes(card.id)}
+                  selected={watch('selectedCardsId') === card.id}
                 >
                   {card.name}
                 </Card>
@@ -202,9 +200,7 @@ const HookForm: NextPage = () => {
               variant="filled"
               colorScheme="blackAlpha"
               id="gender"
-              {...register('gender', {
-                validate: isValidGender,
-              })}
+              {...register('gender')}
             >
               <option value="male">Male</option>
               <option value="Female">Female</option>
@@ -225,4 +221,4 @@ const HookForm: NextPage = () => {
   );
 };
 
-export default HookForm;
+export default HookFormYup;
