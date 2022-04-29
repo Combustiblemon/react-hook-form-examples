@@ -65,14 +65,14 @@ const twoSelected = (value: string[]): ValidateResult => {
 interface initialValuesTypes {
   username: string;
   age: string;
-  selectedCardsId: string;
+  selectedCardIds: string;
   gender: string;
 }
 
 const initialValues: initialValuesTypes = {
   username: '',
   age: '',
-  selectedCardsId: '',
+  selectedCardIds: '',
   gender: 'male',
 };
 
@@ -154,12 +154,12 @@ const HookForm: NextPage = () => {
             />
           </FormElement>
         </FormControl>
-        <FormElement error={errors.selectedCardsId?.message}>
+        <FormElement error={errors.selectedCardIds?.message}>
           <FormLabel htmlFor="direction">Where are you from?</FormLabel>
           {/* This is a collection of cards you can select */}
           <CardWrapper
             id="direction"
-            {...register('selectedCardsId', {
+            {...register('selectedCardIds', {
               required: { value: true, message: 'This is required.' },
             })}
           >
@@ -171,19 +171,19 @@ const HookForm: NextPage = () => {
                     let value = card.id;
 
                     // If card is selected, deselect it
-                    if (card.id === getValues('selectedCardsId')) {
+                    if (card.id === getValues('selectedCardIds')) {
                       value = '';
                     }
 
                     // We have to use 'setValue' in 'onClick' since this is not an input
-                    setValue('selectedCardsId', value, {
+                    setValue('selectedCardIds', value, {
                       shouldTouch: true,
                       // Validation on this runs on first submit and onwards
                       shouldValidate: submitCount > 0,
                     });
                   }}
                   // 'watch' is used to trigger a re-render on the component
-                  selected={watch('selectedCardsId') === card.id}
+                  selected={watch('selectedCardIds') === card.id}
                 >
                   {card.name}
                 </Card>

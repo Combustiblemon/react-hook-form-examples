@@ -65,14 +65,14 @@ const twoSelected = (value: string[]): ValidateResult => {
 interface FormValuesTypes {
   username: string;
   age: string;
-  selectedCardsId: string[];
+  selectedCardIds: string[];
   gender: string;
 }
 
 const initialValues: FormValuesTypes = {
   username: '',
   age: '',
-  selectedCardsId: [],
+  selectedCardIds: [],
   gender: 'male',
 };
 
@@ -155,13 +155,13 @@ const HookForm: NextPage = () => {
         </FormControl>
         <FormElement
           // Weird casting to stop typescript from complaining
-          error={(errors.selectedCardsId as FieldError | undefined)?.message}
+          error={(errors.selectedCardIds as FieldError | undefined)?.message}
         >
           <FormLabel htmlFor="direction">Where are you from?</FormLabel>
           {/* This is a collection of cards you can select */}
           <CardWrapper
             id="direction"
-            {...register('selectedCardsId', {
+            {...register('selectedCardIds', {
               required: { value: true, message: 'This is required.' },
               validate: {
                 isTwo: twoSelected,
@@ -173,7 +173,7 @@ const HookForm: NextPage = () => {
                 <Card
                   key={card.id}
                   onClick={() => {
-                    const selectedCards = getValues('selectedCardsId');
+                    const selectedCards = getValues('selectedCardIds');
 
                     // if card is selected remove it from the 'selectedCards' array
                     // else add it to the selected cards
@@ -184,14 +184,14 @@ const HookForm: NextPage = () => {
                     }
 
                     // We have to use 'setValue' in 'onClick' since this is not an input
-                    setValue('selectedCardsId', selectedCards, {
+                    setValue('selectedCardIds', selectedCards, {
                       shouldTouch: true,
                       // Validation on this runs on first submit and onwards
                       shouldValidate: submitCount > 0,
                     });
                   }}
                   // 'watch' is used to trigger a re-render on the component
-                  selected={watch('selectedCardsId').includes(card.id)}
+                  selected={watch('selectedCardIds').includes(card.id)}
                 >
                   {card.name}
                 </Card>
