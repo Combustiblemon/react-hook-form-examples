@@ -9,7 +9,7 @@ import {
   Select,
 } from '@chakra-ui/react';
 import { NextPage } from 'next/types';
-import { useForm, ValidateResult } from 'react-hook-form';
+import { FieldError, useForm, ValidateResult } from 'react-hook-form';
 
 import FormElement from '../components/form-element/FormElement';
 
@@ -62,14 +62,14 @@ const twoSelected = (value: string[]): ValidateResult => {
   return result;
 };
 
-interface initialValuesTypes {
+interface FormValuesTypes {
   username: string;
   age: string;
   selectedCardsId: string[];
   gender: string;
 }
 
-const initialValues: initialValuesTypes = {
+const initialValues: FormValuesTypes = {
   username: '',
   age: '',
   selectedCardsId: [],
@@ -84,7 +84,7 @@ const HookForm: NextPage = () => {
     setValue,
     getValues,
     watch,
-  } = useForm({
+  } = useForm<FormValuesTypes>({
     // Validation will trigger on the submit event and invalid inputs will
     // attach 'onChange' event listeners to re-validate them.
     mode: 'onSubmit',
@@ -153,14 +153,19 @@ const HookForm: NextPage = () => {
             />
           </FormElement>
         </FormControl>
-        <FormElement error={errors.selectedCardsId?.[0].message}>
+        <FormElement
+          // Weird casting to stop typescript from complaining
+          error={(errors.selectedCardsId as FieldError | undefined)?.message}
+        >
           <FormLabel htmlFor="direction">Where are you from?</FormLabel>
           {/* This is a collection of cards you can select */}
           <CardWrapper
             id="direction"
             {...register('selectedCardsId', {
               required: { value: true, message: 'This is required.' },
-              validate: twoSelected,
+              validate: {
+                isTwo: twoSelected,
+              },
             })}
           >
             {mockAPIData.map((card) => {

@@ -84,7 +84,7 @@ const HookForm: NextPage = () => {
     setValue,
     getValues,
     watch,
-  } = useForm({
+  } = useForm<initialValuesTypes>({
     // Validation will trigger on the submit event and invalid inputs will
     // attach 'onChange' event listeners to re-validate them.
     mode: 'onSubmit',
@@ -105,6 +105,8 @@ const HookForm: NextPage = () => {
     });
   }
 
+  watch();
+
   return (
     <Wrapper>
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -118,7 +120,6 @@ const HookForm: NextPage = () => {
             <Input
               colorScheme="blackAlpha"
               variant="filled"
-              id="username"
               // 'register' takes the name of the field (same as the one in 'initialValues')
               // and an object with the validations and various utilities
               // more info: https://react-hook-form.com/api/useform/register
